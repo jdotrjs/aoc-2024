@@ -1,56 +1,14 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"log"
-	"os"
 	"slices"
 	"strconv"
 	"strings"
 )
 
 type Report []int
-
-// TODO: pull into common lib
-func processInput[T any](processFunc func(string) T) chan T {
-	output_chan := make(chan T)
-
-	go func() {
-		reader := bufio.NewReader(os.Stdin)
-		var str string
-		var e error
-
-		str, e = reader.ReadString('\n')
-		str = strings.Clone(str)
-		str = strings.TrimSpace(str)
-		for e != io.EOF {
-			if str == "" {
-				continue
-			}
-			output_chan <- processFunc(str)
-			str, e = reader.ReadString('\n')
-			str = strings.TrimSpace(str)
-		}
-		if str != "" {
-			last_entry := processFunc(str)
-			output_chan <- last_entry
-		}
-		close(output_chan)
-	}()
-
-	return output_chan
-}
-
-// TODO: same common lib
-func Must[T any](t T, e error) T {
-	if e != nil {
-		log.Panic(e)
-	}
-
-	return t
-}
 
 func stringToReport(s string) Report {
 	parts := strings.Split(s, " ")
@@ -178,7 +136,4 @@ func partTwo() {
 
 func main() {
 	partTwo()
-	// Report([]int{52, 60, 63, 66, 66, 66}).DayTwoSafe()
-	// test := []int{0, 1, 2, 3, 4, 5, 6}
-	// fmt.Printf("%v\n%v\n", test, append(test[0:2], test[3:]...))
 }
