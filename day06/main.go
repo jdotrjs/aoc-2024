@@ -93,7 +93,6 @@ func (self *daySixProcessor) InRange(loc Vector) bool {
 func (self *daySixProcessor) partOne() int {
 	visited := map[Vector]struct{}{}
 	for self.InRange(self.guard.cur) {
-		self.partOnePath = append(self.partOnePath, pair(self.guard.cur, self.guard.facing))
 		// fmt.Printf("%s %c\n", self.guard.cur.ToString(), facingToByte(self.guard.facing))
 		visited[self.guard.cur] = struct{}{}
 		next_loc := self.guard.next_step()
@@ -101,16 +100,14 @@ func (self *daySixProcessor) partOne() int {
 			self.guard.TurnRight()
 		} else {
 			self.guard.cur = next_loc
+			self.partOnePath = append(self.partOnePath, pair(self.guard.cur, self.guard.facing))
 		}
 	}
 
 	return len(visited)
 }
 
-var exits_called int = 0
-
 func (self *daySixProcessor) exits() bool {
-	exits_called++
 	visited := map[Pair[Vector, Facing]]bool{}
 
 	for self.InRange(self.guard.cur) {
@@ -132,27 +129,36 @@ func (self *daySixProcessor) exits() bool {
 
 func (self *daySixProcessor) partTwo() int {
 	loops_found := map[Vector]struct{}{}
+	used_path := map[Vector]bool{}
 
 	for check_idx := 0; check_idx < len(self.partOnePath)-1; check_idx++ {
 		guard_location := self.partOnePath[check_idx]
+		used_path[guard_location.L] = true
 		obs_location := self.partOnePath[check_idx+1].L
-		// fmt.Printf("(%d) Guard location: %s\n", check_idx, guard_location.L.ToString())
 
-		if !self.InRange(obs_location) || obs_location == guard_location.L {
+		if obs_location == self.guard.start {
+			continue
+		}
+		if !self.InRange(obs_location) {
+			continue
+		}
+		if self.At(obs_location.x, obs_location.y) == OBSTACLE {
 			continue
 		}
 		if self.obstacles[obs_location.ToString()] {
-			// fmt.Printf("  Skipping %s\n", obs_location.ToString())
 			continue
 		}
-		// fmt.Printf("  Checking from %s with new obs at %s\n", guard_location.L.ToString(), obs_location.ToString())
+		if used_path[obs_location] {
+			continue
+		}
+
 		self.obstacles[obs_location.ToString()] = true
 		self.guard.cur = guard_location.L
 		self.guard.facing = guard_location.R
 		if !self.exits() {
-			// fmt.Printf("    loops\n")
 			loops_found[obs_location] = struct{}{}
 		}
+
 		delete(self.obstacles, obs_location.ToString())
 	}
 
@@ -169,9 +175,5 @@ func main() {
 	}
 
 	fmt.Printf("Part One: %d\n", p.partOne())
-	// fmt.Printf("Path Walked\n")
-	// for idx, v := range p.partOnePath {
-	// 	fmt.Printf("  %d: %s, %c\n", idx, v.L.ToString(), facingToByte(v.R))
-	// }
 	fmt.Printf("Part Two: %d\n", p.partTwo())
 }
