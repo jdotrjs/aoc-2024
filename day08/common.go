@@ -101,9 +101,24 @@ func (v Vector) ToString() string {
 	return fmt.Sprintf("(%d, %d)", v.x, v.y)
 }
 
+func (v Vector) Sub(w Vector) Vector {
+	return vec2(v.x-w.x, v.y-w.y)
+}
+
 func (v Vector) Add(w Vector) Vector {
 	return vec2(v.x+w.x, v.y+w.y)
 }
+
+func (v Vector) Mult(w Vector) Vector {
+	return vec2(v.x*w.x, v.y*w.y)
+}
+
+var (
+	vec_11   = Vector{1, 1}
+	vec_1n1  = Vector{1, -1}
+	vec_n1n1 = Vector{-1, -1}
+	vec_n11  = Vector{-1, 1}
+)
 
 func vec2(x, y int) Vector {
 	return Vector{x, y}

@@ -20,6 +20,21 @@ func (c *Cell) HasTx() bool {
 	return c.tx != '.'
 }
 
+func (c *Cell) IsAntinode() bool {
+	for _, dist_set := range c.rx_distances {
+		if len(dist_set) == 0 {
+			continue
+		}
+		for range dist_set {
+			if len(dist_set) > 1 {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
 func (c *Cell) ToString() string {
 	tx_str := byte('_')
 	if c.HasTx() {
