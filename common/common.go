@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"io"
 	"log"
 	"os"
@@ -81,4 +82,73 @@ func REextract(re *regexp.Regexp, s string) []string {
 		r = append(r, v[0])
 	}
 	return r
+}
+
+type Pair[T any, U any] struct {
+	L T
+	R U
+}
+
+func NewPair[T any, U any](left T, right U) Pair[T, U] {
+	return Pair[T, U]{left, right}
+}
+
+type Vector struct {
+	x, y int
+}
+
+func (v Vector) ToString() string {
+	return fmt.Sprintf("(%d, %d)", v.x, v.y)
+}
+
+func (v Vector) Sub(w Vector) Vector {
+	return vec2(v.x-w.x, v.y-w.y)
+}
+
+func (v Vector) Add(w Vector) Vector {
+	return vec2(v.x+w.x, v.y+w.y)
+}
+
+func (v Vector) Mult(w Vector) Vector {
+	return vec2(v.x*w.x, v.y*w.y)
+}
+
+var (
+	vec_11   = Vector{1, 1}
+	vec_1n1  = Vector{1, -1}
+	vec_n1n1 = Vector{-1, -1}
+	vec_n11  = Vector{-1, 1}
+)
+
+func vec2(x, y int) Vector {
+	return Vector{x, y}
+}
+
+type IntSet map[int]bool
+
+func (is IntSet) Has(v int) bool {
+	return is[v]
+}
+
+func (is IntSet) Add(v int) {
+	is[v] = true
+}
+
+func (is IntSet) Remove(v int) {
+	delete(is, v)
+}
+
+func (is IntSet) Keys() []int {
+	k := []int{}
+	for ke := range is {
+		k = append(k, ke)
+	}
+	return k
+}
+
+func AbsInt(x int) int {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
