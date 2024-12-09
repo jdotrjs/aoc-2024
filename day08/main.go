@@ -6,6 +6,7 @@ import (
 
 type day8Solver struct {
 	part_one_anode map[Vector]bool
+	part_two_anode map[Vector]bool
 	only_tx        byte
 	grid           map[Vector]Cell
 	dimX           int
@@ -72,7 +73,6 @@ func (solver *day8Solver) markDistancesPairwise() {
 
 func (solver *day8Solver) markDistancePair(fixed_cell *Cell, cell_b *Cell) {
 	delta := cell_b.pos.Sub(fixed_cell.pos)
-	// fmt.Printf("  %s vs %s - delta: %s\n", cell_a.ToString(), cell_b.ToString(), delta.ToString())
 
 	fixed_pos := fixed_cell.pos.Sub(delta)
 	pos_2 := cell_b.pos.Add(delta)
@@ -84,43 +84,18 @@ func (solver *day8Solver) markDistancePair(fixed_cell *Cell, cell_b *Cell) {
 		solver.part_one_anode[pos_2] = true
 	}
 
-	cur_pos := fixed_cell.pos
-	for _, dir := range []Vector{delta, delta.Mult(vec_n1n1)} {
-		for solver.InRangeVec(cur_pos) {
-			if cur_pos != fixed_pos {
-				solver.AtVec(cur_pos)
+	aoeu := map[Vector]bool{}
 
-			}
+	for _, dir := range []Vector{delta, delta.Mult(vec_n1n1)} {
+		cur_pos := fixed_cell.pos
+		for solver.InRangeVec(cur_pos) {
+			aoeu[cur_pos] = true
 			cur_pos = cur_pos.Add(dir)
 		}
 	}
 
-	for _, cell := range []*Cell{fixed_cell, cell_b} {
-		cur_pos := cell.pos
-		for solver.InRangeVec(cur_pos) {
-			if cur_pos != cell.pos {
-				next_cell := solver.AtVec(cur_pos)
-				if next_cell.rx_distances[cell.tx] == nil {
-					next_cell.rx_distances[cell.tx] = IntSet{}
-				}
-
-				next_cell.rx_distances[cell.tx].Add(vec_dist(cur_pos, cell.pos))
-			}
-			cur_pos = cur_pos.Add(delta)
-		}
-
-		cur_pos = cell.pos
-		for solver.InRangeVec(cur_pos) {
-			if cur_pos != cell.pos {
-				next_cell := solver.AtVec(cur_pos)
-				if next_cell.rx_distances[cell.tx] == nil {
-					next_cell.rx_distances[cell.tx] = IntSet{}
-				}
-
-				next_cell.rx_distances[cell.tx].Add(vec_dist(cur_pos, cell.pos))
-			}
-			cur_pos = cur_pos.Sub(delta)
-		}
+	for k := range aoeu {
+		solver.part_two_anode[k] = true
 	}
 }
 
@@ -148,8 +123,7 @@ func (s *day8Solver) PrintGrid() {
 func (s *day8Solver) PrintAntiNodes() {
 	for y := 0; y < s.dimY; y++ {
 		for x := 0; x < s.dimX; x++ {
-			c := s.At(x, y)
-			if c.IsAntinode() {
+			if s.part_two_anode[vec2(x, y)] {
 				fmt.Printf("#")
 			} else {
 				fmt.Printf(".")
@@ -162,6 +136,7 @@ func (s *day8Solver) PrintAntiNodes() {
 func partOne() {
 	solver := day8Solver{
 		part_one_anode: map[Vector]bool{},
+		part_two_anode: map[Vector]bool{},
 		// only_tx:   'j',
 		grid:      map[Vector]Cell{},
 		broadcast: map[byte][]Vector{},
@@ -187,7 +162,7 @@ func partOne() {
 		}
 	}
 
-	fmt.Printf("Part Two: %d\n", p2)
+	fmt.Printf("Part Two: %d\n", len(solver.part_two_anode))
 	solver.PrintGrid()
 	fmt.Println()
 	solver.PrintAntiNodes()
